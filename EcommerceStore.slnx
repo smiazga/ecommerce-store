@@ -1,0 +1,34 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/coding-standards.md" />
+  </Folder>
+  <Folder Name="/docs/adr/">
+    <File Path="docs/adr/ADR-001-clean-architecture.md" />
+  </Folder>
+  <Folder Name="/docs/architecture/">
+    <File Path="docs/architecture/application-patterns.md" />
+    <File Path="docs/architecture/dependency-rules.md" />
+    <File Path="docs/architecture/system-architecture.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Ecommerce.Api/Ecommerce.Api.csproj" />
+    <Project Path="src/Ecommerce.Application/Ecommerce.Application.csproj" />
+    <Project Path="src/Ecommerce.Contracts/Ecommerce.Contracts.csproj" />
+    <Project Path="src/Ecommerce.Domain/Ecommerce.Domain.csproj" />
+    <Project Path="src/Ecommerce.Infrastructure/Ecommerce.Infrastructure.csproj" />
+    <Project Path="src/Ecommerce.Web/Ecommerce.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/Ecommerce.Api.Tests/">
+    <Project Path="tests/Ecommerce.Api.Tests/Ecommmerce.Api.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Ecommerce.Application.Tests/">
+    <Project Path="tests/Ecommerce.Application.Tests/Ecommerce.Application.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Ecommerce.Domain.Tests/">
+    <Project Path="tests/Ecommerce.Domain.Tests/Ecommerce.Domain.Test.csproj" />
+  </Folder>
+  <Folder Name="/tests/Ecommerce.Infrastructure.Tests/">
+    <Project Path="tests/Ecommerce.Infrastructure.Tests/Ecommerce.Infrastructure.Test.csproj" />
+  </Folder>
+</Solution>
