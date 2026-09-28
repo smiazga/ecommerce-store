@@ -15,6 +15,7 @@
     <File Path="docs/architecture/diagrams/bounded-contexts.md" />
     <File Path="docs/architecture/diagrams/clean-architecture.md" />
     <File Path="docs/architecture/diagrams/project-dependencies.md" />
+    <File Path="docs/architecture/domain-model.md" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
@@ -29,7 +30,9 @@
     <Project Path="src/Ecommerce.SharedKernel/Ecommerce.SharedKernel.csproj" />
     <Project Path="src/Ecommerce.Web/Ecommerce.Web.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/Ecommerce.SharedKernel.Tests/Ecommerce.SharedKernel.Tests.csproj" />
+  </Folder>
   <Folder Name="/tests/Ecommerce.Api.Tests/">
     <Project Path="tests/Ecommerce.Api.Tests/Ecommmerce.Api.Tests.csproj" />
   </Folder>
