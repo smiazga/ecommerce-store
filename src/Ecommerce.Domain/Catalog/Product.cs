@@ -59,7 +59,7 @@ public sealed class Product : AggregateRoot
     private Product()
     {
         Name = string.Empty;
-        Sku = new Sku("");
+        Sku = default!;
         Price = new Money(0m, "USD");
         CategoryId = Guid.Empty;
     }
