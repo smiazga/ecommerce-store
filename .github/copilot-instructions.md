@@ -26,6 +26,7 @@ Before generating code, follow these repository documents.
 - docs/architecture/system-architecture.md
 - docs/architecture/dependency-rules.md
 - docs/architecture/application-patterns.md
+- docs/architecture/domain-model.md
 
 ## Standards
 

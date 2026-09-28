@@ -200,7 +200,9 @@ Business rules belong in backend services.
 
 # Bounded Contexts
 
-The application is organized into bounded contexts.
+The application is organized into bounded contexts.For aggregate definitions, invariants, value objects, and domain events see:
+ 
+- docs/architecture/domain-model.md
 
 ---
 
