@@ -8,8 +8,8 @@
   <Folder Name="/docs/architecture/">
     <File Path="docs/architecture/application-patterns.md" />
     <File Path="docs/architecture/dependency-rules.md" />
+    <File Path="docs/architecture/domain-model.md" />
     <File Path="docs/architecture/system-architecture.md" />
-    <File Path="domain-model.md" />
   </Folder>
   <Folder Name="/docs/architecture/diagrams/">
     <File Path="docs/architecture/diagrams/bounded-contexts.md" />

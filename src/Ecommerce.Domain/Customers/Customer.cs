@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Ecommerce.Domain.Aggregates.Catalog
+namespace Ecommerce.Domain.Customers
 {
-    internal class Product
+    internal class Customer
     {
     }
 }

@@ -109,6 +109,42 @@ Reviews
 
 ---
 
+# Domain Organization
+
+Domain code is organized by bounded context.
+
+Preferred structure:
+
+```text
+Ecommerce.Domain
+
+├── Catalog
+│   ├── Product.cs
+│   ├── ProductImage.cs
+│   └── Events
+│
+├── Customers
+│   ├── Customer.cs
+│   ├── CustomerAddress.cs
+│   └── Events
+│
+├── Cart
+│   ├── ShoppingCart.cs
+│   ├── ShoppingCartItem.cs
+│   └── Events
+│
+├── Orders
+│   ├── Order.cs
+│   ├── OrderItem.cs
+│   └── Events
+│
+├── ValueObjects
+│
+├── Interfaces
+│
+└── Specifications
+---
+
 # Shared Value Objects
 
 The following value objects may be reused across multiple contexts.

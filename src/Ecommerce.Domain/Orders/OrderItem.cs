@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Ecommerce.Domain.Aggregates.Orders
+namespace Ecommerce.Domain.Orders
 {
-    internal class Order
+    internal class OrderItem
     {
     }
 }
