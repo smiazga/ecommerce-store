@@ -10,6 +10,11 @@
     <File Path="docs/architecture/dependency-rules.md" />
     <File Path="docs/architecture/system-architecture.md" />
   </Folder>
+  <Folder Name="/docs/architecture/diagrams/">
+    <File Path="docs/architecture/diagrams/bounded-contexts.md" />
+    <File Path="docs/architecture/diagrams/clean-architecture.md" />
+    <File Path="docs/architecture/diagrams/project-dependencies.md" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
