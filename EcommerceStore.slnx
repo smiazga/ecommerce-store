@@ -30,9 +30,7 @@
     <Project Path="src/Ecommerce.SharedKernel/Ecommerce.SharedKernel.csproj" />
     <Project Path="src/Ecommerce.Web/Ecommerce.Web.csproj" />
   </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/Ecommerce.SharedKernel.Tests/Ecommerce.SharedKernel.Tests.csproj" />
-  </Folder>
+  <Folder Name="/tests/" />
   <Folder Name="/tests/Ecommerce.Api.Tests/">
     <Project Path="tests/Ecommerce.Api.Tests/Ecommmerce.Api.Tests.csproj" />
   </Folder>
@@ -44,5 +42,8 @@
   </Folder>
   <Folder Name="/tests/Ecommerce.Infrastructure.Tests/">
     <Project Path="tests/Ecommerce.Infrastructure.Tests/Ecommerce.Infrastructure.Test.csproj" />
+  </Folder>
+  <Folder Name="/tests/Ecommerce.SharedKernel.Tests/">
+    <Project Path="tests/Ecommerce.SharedKernel.Tests/Ecommerce.SharedKernel.Tests.csproj" />
   </Folder>
 </Solution>

@@ -1,9 +1,12 @@
 namespace Ecommerce.SharedKernel.Tests.Exceptions;
 
-using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Ecommerce.SharedKernel.Exceptions;
 using System.Collections.Generic;
+
+using Ecommerce.SharedKernel.Exceptions;
+
+using FluentAssertions;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 [TestClass]
 public sealed class DomainExceptionTests
