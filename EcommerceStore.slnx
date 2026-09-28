@@ -20,6 +20,7 @@
     <Project Path="src/Ecommerce.Contracts/Ecommerce.Contracts.csproj" />
     <Project Path="src/Ecommerce.Domain/Ecommerce.Domain.csproj" />
     <Project Path="src/Ecommerce.Infrastructure/Ecommerce.Infrastructure.csproj" />
+    <Project Path="src/Ecommerce.SharedKernel/Ecommerce.SharedKernel.csproj" />
     <Project Path="src/Ecommerce.Web/Ecommerce.Web.csproj" />
   </Folder>
   <Folder Name="/tests/" />

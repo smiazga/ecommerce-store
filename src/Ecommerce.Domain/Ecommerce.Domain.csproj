@@ -15,4 +15,8 @@
     <Folder Include="Specifications\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ecommerce.SharedKernel\Ecommerce.SharedKernel.csproj" />
+  </ItemGroup>
+
 </Project>

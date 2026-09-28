@@ -20,58 +20,131 @@ All project references must comply with these rules.
 
 Dependencies flow inward.
 
-Business rules should never depend on frameworks or infrastructure implementations.
+Business rules must never depend on frameworks or infrastructure implementations.
+
+The most stable code exists at the center of the architecture.
 
 ```text
-              Infrastructure
-                     │
-                     ▼
+            Ecommerce.Api
+                  │
+                  ▼
 
-API  ───────▶  Application  ───────▶ Domain
+       Ecommerce.Application
+                  │
+                  ▼
 
-                     ▲
-                     │
+          Ecommerce.Domain
+                  │
+                  ▼
 
-               Infrastructure
+      Ecommerce.SharedKernel
+
+                  ▲
+                  │
+
+     Ecommerce.Infrastructure
 
 
-Web ─────▶ Contracts
-                 │
-                 ▼
-                API
+Ecommerce.Web
+      │
+      ▼
+
+Ecommerce.Contracts
 ```
 
-The Domain layer is the center of the architecture.
+The Domain layer is the center of the business architecture.
 
-Everything depends on the Domain.
+SharedKernel is the architectural foundation.
 
-The Domain depends on nothing.
+Everything may depend on SharedKernel.
+
+The Domain depends only on SharedKernel.
+
+SharedKernel depends on nothing except the .NET runtime.
 
 ---
 
 # Project Dependency Diagram
 
 ```text
+Ecommerce.SharedKernel
+        ↑
+
 Ecommerce.Domain
-    ↑
+        ↑
 
 Ecommerce.Application
-    ↑
+        ↑
 
 Ecommerce.Infrastructure
-    ↑
+        ↑
 
 Ecommerce.Api
 
-Ecommerce.Web
-    ↓
 
 Ecommerce.Contracts
+        ↑
+
+Ecommerce.Web
 ```
 
 ---
 
 # Allowed Project References
+
+## Ecommerce.SharedKernel
+
+Allowed References:
+
+```text
+.NET Runtime
+```
+
+Contains:
+
+```text
+Entity
+
+AggregateRoot
+
+ValueObject
+
+DomainEvent
+
+Result
+
+Result<T>
+
+Guard
+
+DomainException
+```
+
+Forbidden:
+
+```text
+Product
+
+Order
+
+Customer
+
+ShoppingCart
+
+Repositories
+
+Application Services
+
+Infrastructure Implementations
+```
+
+Rule:
+
+SharedKernel contains reusable domain building blocks.
+
+SharedKernel must not contain ecommerce-specific business concepts.
+
+---
 
 ## Ecommerce.Domain
 
@@ -79,6 +152,8 @@ Allowed References:
 
 ```text
 .NET Runtime
+
+Ecommerce.SharedKernel
 ```
 
 Forbidden References:
@@ -103,6 +178,28 @@ Rule:
 
 The Domain must remain framework independent.
 
+Contains:
+
+```text
+Aggregates
+
+Entities
+
+Value Objects
+
+Specifications
+
+Repository Interfaces
+
+Domain Events
+
+Business Rules
+
+Business Exceptions
+```
+
+Domain concepts should build upon SharedKernel abstractions.
+
 ---
 
 ## Ecommerce.Application
@@ -110,6 +207,8 @@ The Domain must remain framework independent.
 Allowed References:
 
 ```text
+Ecommerce.SharedKernel
+
 Ecommerce.Domain
 
 MediatR
@@ -146,6 +245,8 @@ Application should depend on abstractions only.
 Allowed References:
 
 ```text
+Ecommerce.SharedKernel
+
 Ecommerce.Domain
 
 Ecommerce.Application
@@ -180,6 +281,10 @@ Infrastructure should not contain business decisions.
 Allowed References:
 
 ```text
+Ecommerce.SharedKernel
+
+Ecommerce.Domain
+
 Ecommerce.Application
 
 Ecommerce.Infrastructure
@@ -265,11 +370,71 @@ Application
 Domain
 
 Infrastructure
+
+SharedKernel
 ```
 
 Rule:
 
 Contracts remain lightweight and transport-oriented.
+
+---
+
+# SharedKernel Rules
+
+Allowed:
+
+```text
+Entity
+
+AggregateRoot
+
+ValueObject
+
+DomainEvent
+
+Result
+
+Result<T>
+
+Guard Clauses
+
+Domain Exceptions
+```
+
+Forbidden:
+
+```text
+Product
+
+Order
+
+Customer
+
+ShoppingCart
+
+PricingService
+
+OrderRepository
+
+Application Services
+
+Business Workflows
+```
+
+A type belongs in SharedKernel only if it can reasonably be reused in a completely different domain.
+
+Examples:
+
+```text
+Banking
+
+Healthcare
+
+ERP
+
+Inventory
+```
 
 ---
 
@@ -280,8 +445,15 @@ Dependencies between namespaces should mirror project dependencies.
 Allowed:
 
 ```csharp
-Ecommerce.Application.Commands
-    -> Ecommerce.Domain.Entities
+Ecommerce.Domain.Products
+    -> Ecommerce.SharedKernel.Common
+```
+
+Allowed:
+
+```csharp
+Ecommerce.Application.Features.Products
+    -> Ecommerce.Domain.Products
 ```
 
 Allowed:
@@ -294,443 +466,19 @@ Ecommerce.Infrastructure.Repositories
 Forbidden:
 
 ```csharp
-Ecommerce.Domain.Entities
+Ecommerce.Domain.Products
     -> Ecommerce.Infrastructure.Persistence
 ```
 
 Forbidden:
 
 ```csharp
-Ecommerce.Application.Commands
+Ecommerce.Application.Features.Products
     -> Ecommerce.Infrastructure.Repositories
 ```
 
 ---
 
-# Domain Rules
+# Aggregate Dependency Rules
 
-The Domain contains business rules.
-
-Allowed:
-
-```text
-Entities
-
-Value Objects
-
-Aggregates
-
-Specifications
-
-Repository Interfaces
-
-Domain Events
-
-Business Exceptions
-```
-
-Forbidden:
-
-```text
-DbContext
-
-HttpContext
-
-ILogger
-
-Configuration
-
-JSON Serialization
-
-API Models
-
-DTOs
-```
-
----
-
-# Application Layer Rules
-
-The Application layer contains use cases.
-
-Allowed:
-
-```text
-Commands
-
-Queries
-
-Handlers
-
-Validators
-
-Interfaces
-
-DTOs
-
-Behaviors
-```
-
-Forbidden:
-
-```text
-SQL
-
-HTTP concerns
-
-UI concerns
-
-Persistence implementations
-```
-
-Application must depend on abstractions.
-
-Example:
-
-```csharp
-IOrderRepository
-```
-
-not
-
-```csharp
-OrderRepository
-```
-
----
-
-# Infrastructure Rules
-
-Infrastructure contains implementation details.
-
-Examples:
-
-```text
-OrderRepository
-
-ApplicationDbContext
-
-IdentityUserStore
-
-StripePaymentProvider
-```
-
-Infrastructure implements interfaces defined elsewhere.
-
-Example:
-
-```csharp
-public sealed class OrderRepository
-    : IOrderRepository
-{
-}
-```
-
----
-
-# API Rules
-
-Endpoints should:
-
-```text
-Receive Requests
-
-Send Commands
-
-Send Queries
-
-Return Responses
-```
-
-Endpoints should not:
-
-```text
-Query DbContext directly
-
-Contain business rules
-
-Perform calculations
-```
-
-Good:
-
-```csharp
-var result = await mediator.Send(command);
-```
-
-Bad:
-
-```csharp
-var order = new Order();
-
-order.AddItem(...);
-
-await dbContext.SaveChangesAsync();
-```
-
----
-
-# Blazor Rules
-
-Blazor components should contain presentation logic.
-
-Allowed:
-
-```text
-Rendering
-
-Validation messages
-
-State management
-
-User interactions
-```
-
-Forbidden:
-
-```text
-Business rules
-
-Database access
-
-Persistence logic
-```
-
-Prefer:
-
-```text
-Blazor
-    -> API
-    -> Application
-    -> Domain
-```
-
-Avoid:
-
-```text
-Blazor
-    -> Domain
-```
-
----
-
-# Mapping Rules
-
-Domain entities should never be returned directly from APIs.
-
-Allowed:
-
-```csharp
-Product
-    -> ProductDto
-```
-
-Allowed:
-
-```csharp
-Order
-    -> OrderResponse
-```
-
-Forbidden:
-
-```csharp
-return order;
-```
-
-from API endpoints.
-
----
-
-# MediatR Rules
-
-All use cases should be exposed through commands or queries.
-
-Examples:
-
-```text
-CreateOrderCommand
-
-CancelOrderCommand
-
-GetOrderByIdQuery
-```
-
-Handlers belong in Application.
-
-Endpoints should communicate through:
-
-```csharp
-IMediator
-
-ISender
-```
-
----
-
-# Repository Rules
-
-Repository interfaces belong in:
-
-```text
-Domain
-
-or
-
-Application
-```
-
-Repository implementations belong in:
-
-```text
-Infrastructure
-```
-
-Preferred:
-
-```csharp
-IOrderRepository
-OrderRepository
-```
-
-Forbidden:
-
-```csharp
-GenericRepository<T>
-```
-
-unless a documented architectural decision approves it.
-
----
-
-# Testing Dependencies
-
-## Domain Tests
-
-Allowed:
-
-```text
-Domain
-```
-
----
-
-## Application Tests
-
-Allowed:
-
-```text
-Application
-Domain
-```
-
----
-
-## Infrastructure Tests
-
-Allowed:
-
-```text
-Infrastructure
-Application
-Domain
-```
-
----
-
-## API Tests
-
-Allowed:
-
-```text
-Api
-Infrastructure
-Application
-Domain
-```
-
----
-
-# Architecture Enforcement
-
-Architecture tests should verify:
-
-```text
-Domain does not reference Infrastructure
-
-Domain does not reference API
-
-Application does not reference Infrastructure
-
-Application does not reference API
-
-Infrastructure does not reference Web
-
-Contracts remain independent
-```
-
-Violations should fail the build.
-
----
-
-# Dependency Injection Rules
-
-Use constructor injection exclusively.
-
-Preferred:
-
-```csharp
-public OrderService(
-    IOrderRepository repository)
-{
-}
-```
-
-Forbidden:
-
-```csharp
-IServiceProvider
-
-Service Locator
-
-Static Container Access
-```
-
----
-
-# Future Expansion Rules
-
-Future bounded contexts should follow the same dependency model.
-
-Examples:
-
-```text
-Inventory
-
-Payments
-
-Shipping
-
-Promotions
-
-Reviews
-```
-
-New features must not introduce dependency violations.
-
----
-
-# Architecture Review Checklist
-
-Before merging a pull request verify:
-
-- Dependencies flow inward.
-- Domain remains framework independent.
-- Business rules remain in Domain.
-- Application uses abstractions.
-- Infrastructure contains implementations.
-- API remains thin.
-- Blazor remains presentation-focused.
-- Architecture tests pass.
-
-If any dependency rule is violated, refactor before merging.
+Aggregates reference other 
