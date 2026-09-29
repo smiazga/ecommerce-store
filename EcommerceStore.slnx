@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/docs/adr/">
     <File Path="docs/adr/ADR-001-clean-architecture.md" />
+    <File Path="docs/adr/ADR-002-Unit-Of-Work.md" />
   </Folder>
   <Folder Name="/docs/architecture/">
     <File Path="docs/architecture/application-patterns.md" />
@@ -42,6 +43,9 @@
   </Folder>
   <Folder Name="/tests/Ecommerce.Infrastructure.Tests/">
     <Project Path="tests/Ecommerce.Infrastructure.Tests/Ecommerce.Infrastructure.Test.csproj" />
+  </Folder>
+  <Folder Name="/tests/Ecommerce.Integration.Tests/">
+    <Project Path="tests/Ecommerce.Integration.Tests/Ecommerce.Integration.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Ecommerce.SharedKernel.Tests/">
     <Project Path="tests/Ecommerce.SharedKernel.Tests/Ecommerce.SharedKernel.Tests.csproj" />
