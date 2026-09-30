@@ -18,6 +18,10 @@
     <File Path="docs/architecture/diagrams/project-dependencies.md" />
     <File Path="docs/architecture/domain-model.md" />
   </Folder>
+  <Folder Name="/docs/misc/">
+    <File Path="docs/misc/CREATEPRODUCT_IMPLEMENTATION_GUIDE.md" />
+    <File Path="docs/misc/CREATEPRODUCT_QUICK_REFERENCE.md" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
