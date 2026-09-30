@@ -18,9 +18,14 @@
     <File Path="docs/architecture/diagrams/project-dependencies.md" />
     <File Path="docs/architecture/domain-model.md" />
   </Folder>
-  <Folder Name="/docs/misc/">
-    <File Path="docs/misc/CREATEPRODUCT_IMPLEMENTATION_GUIDE.md" />
-    <File Path="docs/misc/CREATEPRODUCT_QUICK_REFERENCE.md" />
+  <Folder Name="/docs/misc/" />
+  <Folder Name="/docs/misc/createproduct/">
+    <File Path="docs/misc/createproduct/COMPLETION_CHECKLIST.md" />
+    <File Path="docs/misc/createproduct/CREATEPRODUCT_DIAGRAMS.md" />
+    <File Path="docs/misc/createproduct/CREATEPRODUCT_FEATURE_SUMMARY.md" />
+    <File Path="docs/misc/createproduct/CREATEPRODUCT_IMPLEMENTATION_GUIDE.md" />
+    <File Path="docs/misc/createproduct/CREATEPRODUCT_QUICK_REFERENCE.md" />
+    <File Path="docs/misc/createproduct/CREATEPRODUCT_UNIT_TESTS_SUMMARY.md" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
