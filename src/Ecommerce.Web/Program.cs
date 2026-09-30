@@ -1,10 +1,16 @@
 using Ecommerce.Web.Components;
+using Ecommerce.Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Register product API client and services
+var apiBaseUrl = builder.Configuration["ApiSettings:ProductsApiUrl"]
+    ?? "https://localhost:7297/api/products";
+builder.Services.AddProductServices(apiBaseUrl);
 
 var app = builder.Build();
 

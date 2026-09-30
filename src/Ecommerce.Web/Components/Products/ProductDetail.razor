@@ -1,0 +1,195 @@
+@page "/products/{ProductId:guid}"
+@using Ecommerce.Web.Services.Products
+@using Ecommerce.Web.ViewModels.Products
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+
+<PageTitle>@(product?.Name ?? "Product")</PageTitle>
+
+<div class="container mt-4">
+    <div class="mb-4">
+        <button class="btn btn-outline-secondary" @onclick="GoBack">
+            <span class="oi oi-arrow-left"></span> Back to Products
+        </button>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="alert alert-info">
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            Loading product details...
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+        </div>
+    }
+    else if (product == null)
+    {
+        <div class="alert alert-warning">
+            Product not found.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h1 class="card-title">@product.Name</h1>
+                                <p class="card-text text-muted">SKU: @product.Sku</p>
+                            </div>
+                            <span class="badge text-capitalize" 
+                                  style="@(product.IsActive ? "background-color: #198754;" : "background-color: #ffc107; color: black;")">
+                                @(product.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(product.Description))
+                        {
+                            <hr />
+                            <div>
+                                <h5>Description</h5>
+                                <p class="card-text">@product.Description</p>
+                            </div>
+                        }
+
+                        <hr />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h5>Price</h5>
+                                <p class="h4 text-success">@product.FormattedPrice</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Category ID</h5>
+                                <p class="text-muted">@product.CategoryId</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button class="btn btn-primary" @onclick="GoToEdit">
+                                <span class="oi oi-pencil"></span> Edit Product
+                            </button>
+                            <button class="btn btn-danger" @onclick="DeleteProduct">
+                                <span class="oi oi-trash"></span> Delete Product
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Product Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Product ID</td>
+                                    <td class="text-break">@product.Id</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">SKU</td>
+                                    <td>@product.Sku</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Currency</td>
+                                    <td>@product.Currency</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Status</td>
+                                    <td>
+                                        <span class="badge" 
+                                              style="@(product.IsActive ? "background-color: #198754;" : "background-color: #ffc107; color: black;")">
+                                            @(product.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid ProductId { get; set; }
+
+    private ProductDetailViewModel? product;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProduct();
+    }
+
+    private async Task LoadProduct()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            product = await ProductService.GetProductByIdAsync(ProductId);
+
+            if (product == null)
+            {
+                errorMessage = "Product not found";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load product: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/products");
+    }
+
+    private void GoToEdit()
+    {
+        Navigation.NavigateTo($"/products/{ProductId}/edit");
+    }
+
+    private async Task DeleteProduct()
+    {
+        // Confirm delete
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this product?"))
+        {
+            return;
+        }
+
+        try
+        {
+            // TODO: Implement delete method in IProductService and IProductApiClient
+            // await ProductService.DeleteProductAsync(ProductId);
+            Navigation.NavigateTo("/products");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to delete product: {ex.Message}";
+        }
+    }
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; } = null!;
+}

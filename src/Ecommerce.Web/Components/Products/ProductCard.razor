@@ -1,0 +1,59 @@
+@using Ecommerce.Web.ViewModels.Products
+
+<div class="col-md-4 mb-4">
+    <div class="card h-100 shadow-sm product-card">
+        <div class="card-body">
+            <h5 class="card-title">@Product.Name</h5>
+
+            <p class="card-text text-muted small mb-2">
+                <strong>SKU:</strong> @Product.Sku
+            </p>
+
+            <p class="card-text">
+                @if (string.IsNullOrEmpty(Product.Sku))
+                {
+                    <span class="text-muted">No description</span>
+                }
+            </p>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0 text-success">@Product.FormattedPrice</span>
+                @if (!Product.IsActive)
+                {
+                    <span class="badge bg-warning text-dark">Inactive</span>
+                }
+                else
+                {
+                    <span class="badge bg-success">Active</span>
+                }
+            </div>
+        </div>
+
+        <div class="card-footer bg-transparent border-top">
+            <button class="btn btn-primary btn-sm w-100" 
+                    @onclick="() => OnProductSelected.InvokeAsync(Product.Id)">
+                <span class="oi oi-eye"></span> View Details
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ProductSummaryViewModel Product { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<Guid> OnProductSelected { get; set; }
+
+}
+
+<style>
+.product-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+</style>

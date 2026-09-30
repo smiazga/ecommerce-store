@@ -27,6 +27,12 @@
     <File Path="docs/misc/createproduct/CREATEPRODUCT_QUICK_REFERENCE.md" />
     <File Path="docs/misc/createproduct/CREATEPRODUCT_UNIT_TESTS_SUMMARY.md" />
   </Folder>
+  <Folder Name="/docs/misc/webfront/">
+    <File Path="docs/misc/webfront/IMPLEMENTATION_EXAMPLES.md" />
+    <File Path="docs/misc/webfront/IMPLEMENTATION_SUMMARY.md" />
+    <File Path="docs/misc/webfront/QUICKSTART_PRODUCTS.md" />
+    <File Path="docs/misc/webfront/VALIDATION_CHECKLIST.md" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
