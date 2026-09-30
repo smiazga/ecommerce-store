@@ -6,6 +6,7 @@ using Ecommerce.Domain.Repositories;
 using Ecommerce.Domain.ValueObjects;
 using Ecommerce.SharedKernel.Results;
 using Ecommerce.Application.Common.Persistence;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Handles the creation of a new product in the catalog.
@@ -15,18 +16,22 @@ public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductC
 {
     private readonly IProductRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly Microsoft.Extensions.Logging.ILogger<CreateProductCommandHandler> _logger;
 
     /// <summary>
     /// Initializes a new instance of <see cref="CreateProductCommandHandler"/>.
     /// </summary>
     /// <param name="repository">Product repository abstraction for persistence.</param>
     /// <param name="unitOfWork">Unit of Work for managing transaction boundaries.</param>
-    public CreateProductCommandHandler(IProductRepository repository, IUnitOfWork unitOfWork)
+    /// <param name="logger">Logger for diagnostics.</param>
+    public CreateProductCommandHandler(IProductRepository repository, IUnitOfWork unitOfWork, Microsoft.Extensions.Logging.ILogger<CreateProductCommandHandler> logger)
     {
         ArgumentNullException.ThrowIfNull(repository, nameof(repository));
         ArgumentNullException.ThrowIfNull(unitOfWork, nameof(unitOfWork));
+        ArgumentNullException.ThrowIfNull(logger, nameof(logger));
         _repository = repository;
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     /// <summary>
@@ -104,7 +109,9 @@ public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductC
         }
         catch (Exception ex)
         {
-            // Log unexpected exceptions in production
+            // Log unexpected exceptions for diagnostics
+            _logger.LogError(ex, "Unexpected error while creating product (Sku={Sku})", request.Sku);
+
             return Result<Guid>.Failure(
                 "PRODUCT_CREATION_ERROR",
                 "An unexpected error occurred while creating the product.");

@@ -17,6 +17,9 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.HasKey(p => p.Id);
 
+        // Ignore domain events raised by aggregate roots so EF Core does not attempt to map them
+        builder.Ignore(p => p.DomainEvents);
+
         builder.Property(p => p.Name)
             .IsRequired()
             .HasMaxLength(200);

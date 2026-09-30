@@ -21,6 +21,7 @@ public sealed class CreateProductCommandHandlerTests
 {
     private Mock<IProductRepository> _repositoryMock = null!;
     private Mock<IUnitOfWork> _unitOfWorkMock = null!;
+    private Mock<Microsoft.Extensions.Logging.ILogger<CreateProductCommandHandler>> _loggerMock = null!;
     private CreateProductCommandHandler _handler = null!;
 
     [TestInitialize]
@@ -28,7 +29,8 @@ public sealed class CreateProductCommandHandlerTests
     {
         _repositoryMock = new Mock<IProductRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _handler = new CreateProductCommandHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+        _loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<CreateProductCommandHandler>>();
+        _handler = new CreateProductCommandHandler(_repositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
     }
 
     #region Successful Product Creation
@@ -499,7 +501,7 @@ public sealed class CreateProductCommandHandlerTests
     public void Constructor_NullRepository_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var act = () => new CreateProductCommandHandler(null!, new Mock<IUnitOfWork>().Object);
+        var act = () => new CreateProductCommandHandler(null!, new Mock<IUnitOfWork>().Object, new Mock<Microsoft.Extensions.Logging.ILogger<CreateProductCommandHandler>>().Object);
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -507,7 +509,7 @@ public sealed class CreateProductCommandHandlerTests
     public void Constructor_NullUnitOfWork_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var act = () => new CreateProductCommandHandler(_repositoryMock.Object, null!);
+        var act = () => new CreateProductCommandHandler(_repositoryMock.Object, null!, new Mock<Microsoft.Extensions.Logging.ILogger<CreateProductCommandHandler>>().Object);
         act.Should().Throw<ArgumentNullException>();
     }
 
