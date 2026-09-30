@@ -1,13 +1,16 @@
 namespace Ecommerce.Application.Tests.Catalog.Commands.CreateProduct;
 
-using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Ecommerce.Application.Catalog.Commands.CreateProduct;
+using Ecommerce.Application.Common.Persistence;
 using Ecommerce.Domain.Catalog;
 using Ecommerce.Domain.Repositories;
 using Ecommerce.Domain.ValueObjects;
-using Ecommerce.SharedKernel.Results;
+
+using FluentAssertions;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Moq;
 
 /// <summary>
 /// Unit tests for CreateProductCommandHandler using MSTest, Moq, and FluentAssertions.
@@ -17,13 +20,15 @@ using Ecommerce.SharedKernel.Results;
 public sealed class CreateProductCommandHandlerTests
 {
     private Mock<IProductRepository> _repositoryMock = null!;
+    private Mock<IUnitOfWork> _unitOfWorkMock = null!;
     private CreateProductCommandHandler _handler = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _repositoryMock = new Mock<IProductRepository>();
-        _handler = new CreateProductCommandHandler(_repositoryMock.Object);
+        _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _handler = new CreateProductCommandHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
     }
 
     #region Successful Product Creation
@@ -46,6 +51,9 @@ public sealed class CreateProductCommandHandlerTests
         _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
+        _unitOfWorkMock.Setup(u => u.SaveAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -60,6 +68,10 @@ public sealed class CreateProductCommandHandlerTests
 
         _repositoryMock.Verify(
             r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        _unitOfWorkMock.Verify(
+            u => u.SaveAsync(It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -78,6 +90,9 @@ public sealed class CreateProductCommandHandlerTests
             .ReturnsAsync((Product?)null);
 
         _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _unitOfWorkMock.Setup(u => u.SaveAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -105,6 +120,9 @@ public sealed class CreateProductCommandHandlerTests
         _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
+        _unitOfWorkMock.Setup(u => u.SaveAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -129,6 +147,9 @@ public sealed class CreateProductCommandHandlerTests
         _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
+        _unitOfWorkMock.Setup(u => u.SaveAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -150,6 +171,9 @@ public sealed class CreateProductCommandHandlerTests
             .ReturnsAsync((Product?)null);
 
         _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _unitOfWorkMock.Setup(u => u.SaveAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -195,6 +219,10 @@ public sealed class CreateProductCommandHandlerTests
         _repositoryMock.Verify(
             r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()),
             Times.Never);
+
+        _unitOfWorkMock.Verify(
+            u => u.SaveAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [TestMethod]
@@ -225,6 +253,11 @@ public sealed class CreateProductCommandHandlerTests
             r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()),
             Times.Never,
             "Product should not be persisted when duplicate SKU is found");
+
+        _unitOfWorkMock.Verify(
+            u => u.SaveAsync(It.IsAny<CancellationToken>()),
+            Times.Never,
+            "UnitOfWork.SaveAsync should not be called when duplicate SKU is found");
     }
 
     #endregion
@@ -466,7 +499,15 @@ public sealed class CreateProductCommandHandlerTests
     public void Constructor_NullRepository_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var act = () => new CreateProductCommandHandler(null!);
+        var act = () => new CreateProductCommandHandler(null!, new Mock<IUnitOfWork>().Object);
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [TestMethod]
+    public void Constructor_NullUnitOfWork_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        var act = () => new CreateProductCommandHandler(_repositoryMock.Object, null!);
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -494,11 +535,15 @@ public sealed class CreateProductCommandHandlerTests
             .Callback(() => callOrder.Add("Add"))
             .Returns(Task.CompletedTask);
 
+        _unitOfWorkMock.Setup(u => u.SaveAsync(It.IsAny<CancellationToken>()))
+            .Callback(() => callOrder.Add("Save"))
+            .Returns(Task.CompletedTask);
+
         // Act
         await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        callOrder.Should().Equal("GetBySku", "Add");
+        callOrder.Should().Equal("GetBySku", "Add", "Save");
     }
 
     [TestMethod]
@@ -520,6 +565,9 @@ public sealed class CreateProductCommandHandlerTests
         _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
+        _unitOfWorkMock.Setup(u => u.SaveAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         // Act
         await _handler.Handle(command, token);
 
@@ -530,6 +578,10 @@ public sealed class CreateProductCommandHandlerTests
 
         _repositoryMock.Verify(
             r => r.AddAsync(It.IsAny<Product>(), token),
+            Times.Once);
+
+        _unitOfWorkMock.Verify(
+            u => u.SaveAsync(token),
             Times.Once);
     }
 

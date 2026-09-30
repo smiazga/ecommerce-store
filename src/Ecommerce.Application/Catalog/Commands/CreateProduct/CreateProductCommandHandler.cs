@@ -5,6 +5,7 @@ using Ecommerce.Domain.Catalog;
 using Ecommerce.Domain.Repositories;
 using Ecommerce.Domain.ValueObjects;
 using Ecommerce.SharedKernel.Results;
+using Ecommerce.Application.Common.Persistence;
 
 /// <summary>
 /// Handles the creation of a new product in the catalog.
@@ -13,15 +14,19 @@ using Ecommerce.SharedKernel.Results;
 public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Result<Guid>>
 {
     private readonly IProductRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of <see cref="CreateProductCommandHandler"/>.
     /// </summary>
     /// <param name="repository">Product repository abstraction for persistence.</param>
-    public CreateProductCommandHandler(IProductRepository repository)
+    /// <param name="unitOfWork">Unit of Work for managing transaction boundaries.</param>
+    public CreateProductCommandHandler(IProductRepository repository, IUnitOfWork unitOfWork)
     {
         ArgumentNullException.ThrowIfNull(repository, nameof(repository));
+        ArgumentNullException.ThrowIfNull(unitOfWork, nameof(unitOfWork));
         _repository = repository;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -76,8 +81,11 @@ public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductC
             }
 
             // Persist product aggregate via repository abstraction
-            // Transaction boundaries managed by Infrastructure (DbContext SaveChanges)
+            // Handler determines transaction boundary and commits changes via Unit of Work
             await _repository.AddAsync(product, cancellationToken);
+
+            // Commit all pending changes in a single transaction (per ADR-002)
+            await _unitOfWork.SaveAsync(cancellationToken);
 
             // Return success with created product ID
             return Result<Guid>.Success(product.Id);

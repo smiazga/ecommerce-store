@@ -1,5 +1,6 @@
 namespace Ecommerce.Infrastructure.DependencyInjection;
 
+using Ecommerce.Application.Common.Persistence;
 using Ecommerce.Domain.Repositories;
 using Ecommerce.Infrastructure.Persistence;
 using Ecommerce.Infrastructure.Persistence.Repositories;
@@ -25,6 +26,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddDbContext<EcommerceDbContext>(configureDb);
 
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

@@ -1,6 +1,14 @@
 @Ecommerce.Api_HostAddress = http://localhost:5164
 
-GET {{Ecommerce.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Create Product
+POST {{Ecommerce.Api_HostAddress}}/api/products
+Content-Type: application/json
 
-###
+{
+  "sku": "PROD-001",
+  "name": "Sample Product",
+  "price": 29.99,
+  "categoryId": "550e8400-e29b-41d4-a716-446655440000",
+  "description": "A sample product for testing",
+  "currency": "USD"
+}
