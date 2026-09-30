@@ -56,4 +56,19 @@ public sealed class ProductRepository : IProductRepository
         _dbContext.Products.Update(product);
         return Task.CompletedTask;
     }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<Product>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    {
+        if (pageNumber <= 0) throw new ArgumentOutOfRangeException(nameof(pageNumber));
+        if (pageSize <= 0) throw new ArgumentOutOfRangeException(nameof(pageSize));
+
+        return await _dbContext.Products
+            .Include(p => p.Images)
+            .OrderBy(p => p.Name)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

@@ -27,4 +27,9 @@ public interface IProductRepository
     /// Updates an existing product in the repository.
     /// </summary>
     Task UpdateAsync(Product product, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns a paged list of products.
+    /// </summary>
+    Task<IEnumerable<Product>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);
 }
