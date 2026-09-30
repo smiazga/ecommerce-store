@@ -1,0 +1,262 @@
+@page "/products/create"
+@rendermode InteractiveServer
+@using Ecommerce.Web.Services.Products
+@using Ecommerce.Web.ViewModels.Products
+@using System.ComponentModel.DataAnnotations
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+
+<PageTitle>Create Product</PageTitle>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Create New Product</h4>
+                </div>
+
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong>Success!</strong> @successMessage
+                            <button type="button" class="btn-close" @onclick="() => successMessage = null"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error:</strong> @errorMessage
+                            <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+                        </div>
+                    }
+
+                    <EditForm Model="formModel" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="skuInput" class="form-label">SKU <span class="text-danger">*</span></label>
+                                    <InputText 
+                                        id="skuInput"
+                                        class="form-control"
+                                        @bind-Value="formModel.Sku"
+                                        placeholder="Enter product SKU"
+                                        disabled="@isSubmitting" />
+                                    <ValidationMessage For="@(() => formModel.Sku)" class="text-danger small mt-1" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="currencyInput" class="form-label">Currency <span class="text-danger">*</span></label>
+                                    <InputText 
+                                        id="currencyInput"
+                                        class="form-control"
+                                        @bind-Value="formModel.Currency"
+                                        placeholder="USD"
+                                        disabled="@isSubmitting"
+                                        maxlength="3" />
+                                    <ValidationMessage For="@(() => formModel.Currency)" class="text-danger small mt-1" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="nameInput" class="form-label">Product Name <span class="text-danger">*</span></label>
+                            <InputText 
+                                id="nameInput"
+                                class="form-control"
+                                @bind-Value="formModel.Name"
+                                placeholder="Enter product name"
+                                disabled="@isSubmitting" />
+                            <ValidationMessage For="@(() => formModel.Name)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descriptionInput" class="form-label">Description</label>
+                            <InputTextArea 
+                                id="descriptionInput"
+                                class="form-control"
+                                @bind-Value="formModel.Description"
+                                placeholder="Enter product description (optional)"
+                                disabled="@isSubmitting"
+                                rows="4" />
+                            <ValidationMessage For="@(() => formModel.Description)" class="text-danger small mt-1" />
+                            <small class="text-muted">
+                                @(formModel.Description?.Length ?? 0) / 2000 characters
+                            </small>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="priceInput" class="form-label">Price <span class="text-danger">*</span></label>
+                                    <InputNumber 
+                                        id="priceInput"
+                                        class="form-control"
+                                        @bind-Value="formModel.Price"
+                                        placeholder="0.00"
+                                        disabled="@isSubmitting"
+                                        step="0.01" />
+                                    <ValidationMessage For="@(() => formModel.Price)" class="text-danger small mt-1" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="categoryInput" class="form-label">Category ID <span class="text-danger">*</span></label>
+                                    <InputText 
+                                        id="categoryInput"
+                                        class="form-control"
+                                        @bind-Value="categoryIdString"
+                                        placeholder="Enter category GUID"
+                                        disabled="@isSubmitting" />
+                                    <ValidationMessage For="@(() => formModel.CategoryId)" class="text-danger small mt-1" />
+                                    @if (!string.IsNullOrEmpty(categoryIdError))
+                                    {
+                                        <div class="text-danger small mt-1">@categoryIdError</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button 
+                                type="submit" 
+                                class="btn btn-primary"
+                                disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span>Creating...</span>
+                                }
+                                else
+                                {
+                                    <span class="oi oi-check me-2"></span>
+                                    <span>Create Product</span>
+                                }
+                            </button>
+                            <button 
+                                type="button" 
+                                class="btn btn-secondary"
+                                @onclick="GoBack"
+                                disabled="@isSubmitting">
+                                <span class="oi oi-arrow-left me-2"></span>
+                                <span>Cancel</span>
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Information</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">
+                        <strong>Required Fields:</strong> SKU, Name, Price, Currency, and Category are mandatory.
+                    </p>
+                    <hr />
+                    <p class="text-muted small">
+                        <strong>Price Format:</strong> Enter the price amount (e.g., 19.99). Must be greater than zero.
+                    </p>
+                    <hr />
+                    <p class="text-muted small">
+                        <strong>Currency:</strong> Standard 3-letter currency code (e.g., USD, EUR, GBP).
+                    </p>
+                    <hr />
+                    <p class="text-muted small">
+                        <strong>Category:</strong> Enter a valid GUID for the product category.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateProductViewModel formModel = new();
+    private string categoryIdString = string.Empty;
+    private string? categoryIdError;
+    private bool isSubmitting;
+    private string? successMessage;
+    private string? errorMessage;
+
+    private async Task HandleSubmit()
+    {
+        categoryIdError = null;
+        errorMessage = null;
+
+        // Validate Category ID format
+        if (!Guid.TryParse(categoryIdString, out var categoryId))
+        {
+            categoryIdError = "Category ID must be a valid GUID";
+            return;
+        }
+
+        formModel.CategoryId = categoryId;
+
+        try
+        {
+            isSubmitting = true;
+            var result = await ProductService.CreateProductAsync(formModel);
+
+            successMessage = $"Product '{result.Name}' created successfully!";
+
+            // Navigate back after brief delay to show success message
+            await Task.Delay(1000);
+            Navigation.NavigateTo("/products");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to create product: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/products");
+    }
+}
+
+<style>
+.form-label {
+    font-weight: 500;
+    color: #212529;
+}
+
+.text-danger {
+    font-weight: 600;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+}
+
+.card-header {
+    border-bottom: 1px solid #e9ecef;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+</style>

@@ -1,6 +1,7 @@
 namespace Ecommerce.Web.Clients;
 
 using System.Text.Json;
+
 using Ecommerce.Contracts.Catalog;
 
 /// <summary>
@@ -31,7 +32,7 @@ public sealed class ProductApiClient : IProductApiClient
             _logger.LogInformation("Fetching product with ID: {ProductId}", id);
 
             // Use relative URI segments when BaseAddress already contains the API path
-            var response = await _httpClient.GetAsync($"{id}", cancellationToken);
+            var response = await _httpClient.GetAsync($"/api/products/{id}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
