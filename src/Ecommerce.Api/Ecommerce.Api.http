@@ -12,3 +12,13 @@ Content-Type: application/json
   "description": "A sample product for testing",
   "currency": "USD"
 }
+
+### Get Products (paged)
+GET {{Ecommerce.Api_HostAddress}}/api/products?pageNumber=1&pageSize=20
+Accept: application/json
+
+
+### Get Product By Id
+GET {{Ecommerce.Api_HostAddress}}/api/products/3871FA99-7917-487F-9E30-24943B37453B
+Accept: application/json
+

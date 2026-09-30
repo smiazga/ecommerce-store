@@ -3,6 +3,8 @@ namespace Ecommerce.Api.Endpoints.Products;
 using MediatR;
 using Ecommerce.Application.Catalog.Commands.CreateProduct;
 using Ecommerce.Application.Catalog.DTOs;
+using Ecommerce.Application.Catalog.Queries.GetProductById;
+using Ecommerce.Application.Catalog.Queries.GetProducts;
 using Ecommerce.Contracts.Catalog;
 using Ecommerce.Domain.Repositories;
 using Microsoft.AspNetCore.Http;
@@ -27,6 +29,21 @@ public static class ProductEndpoints
             .WithDescription("Creates a new product in the catalog")
             .Produces<CreateProductResponse>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .WithOpenApi();
+
+        group.MapGet("/{id:guid}", GetProductByIdAsync)
+            .WithName("GetProductById")
+            .WithDescription("Retrieves a product by its identifier")
+            .Produces<ProductDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .WithOpenApi();
+
+        group.MapGet("/", GetProductsAsync)
+            .WithName("GetProducts")
+            .WithDescription("Retrieves a paged list of products")
+            .Produces<IEnumerable<ProductDto>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
             .WithOpenApi();
     }
@@ -93,6 +110,48 @@ public static class ProductEndpoints
 
         // Return 201 Created with Location header and response body
         return Results.Created($"/api/products/{productId}", response);
+    }
+
+    /// <summary>
+    /// Retrieves a product by id through MediatR query.
+    /// </summary>
+    private static async Task<IResult> GetProductByIdAsync(
+        Guid id,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var dto = await sender.Send(new GetProductByIdQuery(id), cancellationToken);
+        if (dto is null)
+        {
+            return Results.NotFound(new ProblemDetails
+            {
+                Type = "https://api.example.com/errors/not-found",
+                Title = "Product Not Found",
+                Status = StatusCodes.Status404NotFound,
+                Detail = $"Product with id '{id}' was not found.",
+                Instance = $"GET /api/products/{id}"
+            });
+        }
+
+        return Results.Ok(dto);
+    }
+
+    /// <summary>
+    /// Retrieves a paged list of products through MediatR query.
+    /// </summary>
+    private static async Task<IResult> GetProductsAsync(
+        [FromQuery] int pageNumber,
+        [FromQuery] int pageSize,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        // Provide sensible defaults if not supplied
+        if (pageNumber <= 0) pageNumber = 1;
+        if (pageSize <= 0) pageSize = 20;
+
+        var products = await sender.Send(new GetProductsQuery(pageNumber, pageSize), cancellationToken);
+
+        return Results.Ok(products);
     }
 
     /// <summary>
