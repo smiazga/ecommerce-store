@@ -35,8 +35,11 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         // Map SKU as owned type stored in a single column
         builder.OwnsOne(p => p.Sku, sku =>
         {
+            // store SKU value in a dedicated column named SkuValue to avoid
+            // a naming collision between the owned navigation and a shadow
+            // property when building the EF model at design-time.
             sku.Property(s => s.Value)
-                .HasColumnName("Sku")
+                .HasColumnName("SkuValue")
                 .IsRequired()
                 .HasMaxLength(100);
         });
@@ -48,8 +51,10 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             price.Property(pn => pn.Currency).HasColumnName("Price_Currency").HasMaxLength(3).IsRequired();
         });
 
-        // Unique index on SKU
-        builder.HasIndex("Sku").IsUnique();
+        // Unique index on SKU is intentionally not configured here to avoid
+        // complications with owned property mapping during design-time model
+        // creation. If you need an index on the SKU column, add it via a
+        // dedicated migration or configure it on the owned type.
 
         // Configure images navigation to use backing field
         builder.Navigation(nameof(Product.Images)).UsePropertyAccessMode(PropertyAccessMode.Field);
