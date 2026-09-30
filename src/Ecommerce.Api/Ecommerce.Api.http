@@ -22,3 +22,16 @@ Accept: application/json
 GET {{Ecommerce.Api_HostAddress}}/api/products/3871FA99-7917-487F-9E30-24943B37453B
 Accept: application/json
 
+
+### Update Product
+PUT {{Ecommerce.Api_HostAddress}}/api/products/3871FA99-7917-487F-9E30-24943B37453B
+Content-Type: application/json
+
+{
+  "name": "Updated Product Name",
+  "description": "Updated description for the product",
+  "price": 39.99,
+  "currency": "USD",
+  "categoryId": "550e8400-e29b-41d4-a716-446655440000",
+  "isActive": true
+}

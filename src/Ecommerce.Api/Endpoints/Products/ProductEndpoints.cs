@@ -2,6 +2,7 @@ namespace Ecommerce.Api.Endpoints.Products;
 
 using MediatR;
 using Ecommerce.Application.Catalog.Commands.CreateProduct;
+using Ecommerce.Application.Catalog.Commands.UpdateProduct;
 using Ecommerce.Application.Catalog.DTOs;
 using Ecommerce.Application.Catalog.Queries.GetProductById;
 using Ecommerce.Application.Catalog.Queries.GetProducts;
@@ -36,6 +37,15 @@ public static class ProductEndpoints
             .WithName("GetProductById")
             .WithDescription("Retrieves a product by its identifier")
             .Produces<ProductDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .WithOpenApi();
+
+        group.MapPut("/{id:guid}", UpdateProductAsync)
+            .WithName("UpdateProduct")
+            .WithDescription("Updates an existing product in the catalog")
+            .Produces<ProductDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
             .WithOpenApi();
@@ -113,6 +123,89 @@ public static class ProductEndpoints
     }
 
     /// <summary>
+    /// Updates an existing product.
+    /// </summary>
+    /// <param name="id">The product identifier.</param>
+    /// <param name="request">The product update request (all fields optional).</param>
+    /// <param name="sender">MediatR ISender for command handling.</param>
+    /// <param name="repository">Product repository for fetching updated product.</param>
+    /// <param name="cancellationToken">Cancellation token for async operations.</param>
+    /// <returns>
+    /// 200 OK: Product successfully updated with response containing updated product details.
+    /// 400 Bad Request: Validation failed or business rule violation.
+    /// 404 Not Found: Product with specified id does not exist.
+    /// 500 Internal Server Error: Unexpected server error.
+    /// </returns>
+    private static async Task<IResult> UpdateProductAsync(
+        Guid id,
+        UpdateProductRequest request,
+        ISender sender,
+        IProductRepository repository,
+        CancellationToken cancellationToken)
+    {
+        // Guard clause - validate request is not null
+        ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+        // Create command from request DTO
+        var command = new UpdateProductCommand(
+            ProductId: id,
+            Name: request.Name,
+            Description: request.Description,
+            Price: request.Price,
+            Currency: request.Currency,
+            CategoryId: request.CategoryId,
+            IsActive: request.IsActive);
+
+        // Send command through MediatR pipeline
+        // Pipeline includes: Validation -> Handler
+        var result = await sender.Send(command, cancellationToken);
+
+        // Handle command failure
+        if (!result.IsSuccess)
+        {
+            // Determine appropriate HTTP status based on error code
+            var statusCode = result.Error?.Code switch
+            {
+                "PRODUCT_NOT_FOUND" => StatusCodes.Status404NotFound,
+                _ => StatusCodes.Status400BadRequest
+            };
+
+            var problemDetails = new ProblemDetails
+            {
+                Type = statusCode == StatusCodes.Status404NotFound
+                    ? "https://api.example.com/errors/not-found"
+                    : "https://api.example.com/errors/validation-failed",
+                Title = statusCode == StatusCodes.Status404NotFound
+                    ? "Product Not Found"
+                    : "Product Update Failed",
+                Status = statusCode,
+                Detail = result.Error?.Message ?? "Failed to update product",
+                Instance = $"PUT /api/products/{id}",
+                Extensions = new Dictionary<string, object?>
+                {
+                    { "errorCode", result.Error?.Code ?? "UNKNOWN" }
+                }
+            };
+
+            return statusCode == StatusCodes.Status404NotFound
+                ? Results.NotFound(problemDetails)
+                : Results.BadRequest(problemDetails);
+        }
+
+        // Extract product ID from successful result
+        var productId = result.Value;
+
+        // Fetch updated product from repository for response
+        var product = await repository.GetByIdAsync(productId, cancellationToken);
+
+        // Map domain entity to response DTO
+        var response = ProductToDto(product);
+
+        // Return 200 OK with updated product
+        return Results.Ok(response);
+    }
+
+    /// <summary>
     /// Retrieves a product by id through MediatR query.
     /// </summary>
     private static async Task<IResult> GetProductByIdAsync(
@@ -164,6 +257,26 @@ public static class ProductEndpoints
         ArgumentNullException.ThrowIfNull(product, nameof(product));
 
         return new CreateProductResponse(
+            Id: product.Id,
+            Sku: product.Sku.Value,
+            Name: product.Name,
+            Description: product.Description,
+            Price: product.Price.Amount,
+            Currency: product.Price.Currency,
+            CategoryId: product.CategoryId,
+            IsActive: product.IsActive);
+    }
+
+    /// <summary>
+    /// Maps a Product domain entity to a ProductDto DTO.
+    /// </summary>
+    /// <param name="product">The product domain entity.</param>
+    /// <returns>Product DTO for API response.</returns>
+    private static ProductDto ProductToDto(Domain.Catalog.Product product)
+    {
+        ArgumentNullException.ThrowIfNull(product, nameof(product));
+
+        return new ProductDto(
             Id: product.Id,
             Sku: product.Sku.Value,
             Name: product.Name,
