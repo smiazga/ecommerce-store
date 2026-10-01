@@ -170,6 +170,26 @@ public sealed class ProductService : IProductService
     }
 
     /// <summary>
+    /// Deletes (deactivates) an existing product.
+    /// </summary>
+    public async Task DeleteProductAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Deleting product: {ProductId}", id);
+
+            await _apiClient.DeleteProductAsync(id, cancellationToken);
+
+            _logger.LogInformation("Successfully deleted product: {ProductId}", id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting product: {ProductId}", id);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Maps API response to ProductSummaryViewModel.
     /// </summary>
     private static ProductSummaryViewModel MapToSummaryViewModel(CreateProductResponse response)

@@ -49,4 +49,14 @@ public interface IProductApiClient
         Guid id,
         UpdateProductRequest request,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes (deactivates) an existing product.
+    /// </summary>
+    /// <param name="id">The product identifier.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>Response containing the deleted product details.</returns>
+    Task<CreateProductResponse> DeleteProductAsync(
+        Guid id,
+        CancellationToken cancellationToken = default);
 }

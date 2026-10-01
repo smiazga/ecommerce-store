@@ -51,4 +51,12 @@ public interface IProductService
         Guid id,
         UpdateProductViewModel request,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes (deactivates) an existing product.
+    /// </summary>
+    /// <param name="id">The product identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task DeleteProductAsync(Guid id, CancellationToken cancellationToken = default);
 }

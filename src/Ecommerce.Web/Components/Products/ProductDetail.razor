@@ -181,13 +181,17 @@
 
         try
         {
-            // TODO: Implement delete method in IProductService and IProductApiClient
-            // await ProductService.DeleteProductAsync(ProductId);
+            isLoading = true;
+            errorMessage = null;
+
+            await ProductService.DeleteProductAsync(ProductId);
+
             Navigation.NavigateTo("/products");
         }
         catch (Exception ex)
         {
             errorMessage = $"Failed to delete product: {ex.Message}";
+            isLoading = false;
         }
     }
 

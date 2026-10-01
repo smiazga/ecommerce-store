@@ -209,6 +209,50 @@ public sealed class ProductApiClient : IProductApiClient
     }
 
     /// <summary>
+    /// Deletes (deactivates) an existing product.
+    /// </summary>
+    public async Task<CreateProductResponse> DeleteProductAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Deleting product: {ProductId}", id);
+
+            // DELETE to the specific product resource
+            var response = await _httpClient.DeleteAsync($"/api/products/{id}", cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Failed to delete product {ProductId}. Status: {StatusCode}", id, response.StatusCode);
+                response.EnsureSuccessStatusCode();
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            var deletedProduct = JsonSerializer.Deserialize<CreateProductResponse>(responseContent, GetJsonOptions());
+
+            if (deletedProduct is null)
+            {
+                _logger.LogError("Delete product response deserialization returned null");
+                throw new InvalidOperationException("Failed to deserialize delete product response");
+            }
+
+            _logger.LogInformation("Successfully deleted product: {ProductId}", deletedProduct.Id);
+            return deletedProduct;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP error while deleting product {ProductId}", id);
+            throw;
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "JSON error while deleting product {ProductId}", id);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Gets JSON serializer options for consistent deserialization.
     /// </summary>
     private static JsonSerializerOptions GetJsonOptions()
