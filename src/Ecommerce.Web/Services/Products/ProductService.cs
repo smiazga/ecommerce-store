@@ -129,6 +129,47 @@ public sealed class ProductService : IProductService
     }
 
     /// <summary>
+    /// Updates an existing product.
+    /// </summary>
+    public async Task<ProductDetailViewModel> UpdateProductAsync(
+        Guid id,
+        UpdateProductViewModel request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+        try
+        {
+            _logger.LogInformation("Updating product: {ProductId}", id);
+
+            var updateRequest = new UpdateProductRequest(
+                request.Name,
+                request.Description,
+                request.Price,
+                request.Currency,
+                request.CategoryId,
+                request.IsActive);
+
+            var response = await _apiClient.UpdateProductAsync(id, updateRequest, cancellationToken);
+
+            if (response is null)
+            {
+                _logger.LogError("Product update returned null response");
+                throw new InvalidOperationException("Product update unexpected response");
+            }
+
+            var viewModel = MapToDetailViewModel(response);
+            _logger.LogInformation("Successfully updated product: {ProductId}", response.Id);
+            return viewModel;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating product: {ProductId}", id);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Maps API response to ProductSummaryViewModel.
     /// </summary>
     private static ProductSummaryViewModel MapToSummaryViewModel(CreateProductResponse response)

@@ -37,4 +37,16 @@ public interface IProductApiClient
     Task<CreateProductResponse> CreateProductAsync(
         CreateProductRequest request,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing product.
+    /// </summary>
+    /// <param name="id">The product identifier.</param>
+    /// <param name="request">The product update request (all fields optional).</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>Response containing the updated product details.</returns>
+    Task<CreateProductResponse> UpdateProductAsync(
+        Guid id,
+        UpdateProductRequest request,
+        CancellationToken cancellationToken = default);
 }

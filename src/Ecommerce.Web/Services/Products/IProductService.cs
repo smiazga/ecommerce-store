@@ -39,4 +39,16 @@ public interface IProductService
     Task<ProductDetailViewModel> CreateProductAsync(
         CreateProductViewModel request,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing product.
+    /// </summary>
+    /// <param name="id">The product identifier.</param>
+    /// <param name="request">Product update request with optional fields.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>ProductDetailViewModel of the updated product.</returns>
+    Task<ProductDetailViewModel> UpdateProductAsync(
+        Guid id,
+        UpdateProductViewModel request,
+        CancellationToken cancellationToken = default);
 }

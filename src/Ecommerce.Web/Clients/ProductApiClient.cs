@@ -159,6 +159,56 @@ public sealed class ProductApiClient : IProductApiClient
     }
 
     /// <summary>
+    /// Updates an existing product.
+    /// </summary>
+    public async Task<CreateProductResponse> UpdateProductAsync(
+        Guid id,
+        UpdateProductRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+        try
+        {
+            _logger.LogInformation("Updating product: {ProductId}", id);
+
+            var jsonContent = JsonSerializer.Serialize(request, GetJsonOptions());
+            var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+            // PUT to the specific product resource
+            var response = await _httpClient.PutAsync($"/api/products/{id}", content, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Failed to update product {ProductId}. Status: {StatusCode}", id, response.StatusCode);
+                response.EnsureSuccessStatusCode();
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            var updatedProduct = JsonSerializer.Deserialize<CreateProductResponse>(responseContent, GetJsonOptions());
+
+            if (updatedProduct is null)
+            {
+                _logger.LogError("Update product response deserialization returned null");
+                throw new InvalidOperationException("Failed to deserialize update product response");
+            }
+
+            _logger.LogInformation("Successfully updated product: {ProductId}", updatedProduct.Id);
+            return updatedProduct;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP error while updating product {ProductId}", id);
+            throw;
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "JSON error while updating product {ProductId}", id);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Gets JSON serializer options for consistent deserialization.
     /// </summary>
     private static JsonSerializerOptions GetJsonOptions()

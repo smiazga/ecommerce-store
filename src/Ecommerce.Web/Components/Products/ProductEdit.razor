@@ -1,0 +1,281 @@
+@page "/products/{ProductId:guid}/edit"
+@rendermode InteractiveServer
+@using Ecommerce.Web.Services.Products
+@using Ecommerce.Web.ViewModels.Products
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Product</PageTitle>
+
+<div class="container mt-4">
+    <div class="mb-4">
+        <button class="btn btn-outline-secondary" @onclick="GoBack">
+            <span class="oi oi-arrow-left"></span> Back to Product
+        </button>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="alert alert-info">
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            Loading product details...
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+        </div>
+    }
+    else if (product == null)
+    {
+        <div class="alert alert-warning">
+            Product not found.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Edit Product: @product.Name</h5>
+                    </div>
+                    <div class="card-body">
+                        <EditForm Model="formModel" OnValidSubmit="HandleSubmit">
+                            <DataAnnotationsValidator />
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Product Name</label>
+                                <InputText id="name" @bind-Value="formModel.Name" class="form-control" placeholder="Leave blank to keep current value" />
+                                <small class="form-text text-muted">Current: @product.Name</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <InputTextArea id="description" @bind-Value="formModel.Description" class="form-control" rows="4" placeholder="Leave blank to keep current value" />
+                                <small class="form-text text-muted">Current: @(string.IsNullOrEmpty(product.Description) ? "No description" : product.Description)</small>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="price" class="form-label">Price</label>
+                                        <InputNumber id="price" @bind-Value="formModel.Price" class="form-control" placeholder="Leave blank to keep current value" />
+                                        <small class="form-text text-muted">Current: @product.FormattedPrice</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="currency" class="form-label">Currency</label>
+                                        <InputText id="currency" @bind-Value="formModel.Currency" class="form-control" placeholder="e.g., USD" maxlength="3" />
+                                        <small class="form-text text-muted">Current: @product.Currency</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="categoryId" class="form-label">Category ID</label>
+                                <InputText id="categoryId" @bind-Value="categoryIdString" class="form-control" placeholder="Leave blank to keep current value" />
+                                <small class="form-text text-muted">Current: @product.CategoryId</small>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <InputCheckbox id="isActive" @bind-Value="isActiveCheckbox" class="form-check-input" />
+                                <label class="form-check-label" for="isActive">
+                                    Active
+                                </label>
+                                <small class="form-text text-muted d-block">
+                                    Currently: @(product.IsActive ? "Active" : "Inactive")
+                                </small>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                                    @if (isSubmitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status">
+                                            <span class="visually-hidden">Saving...</span>
+                                        </span>
+                                        <span>Saving...</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="oi oi-check"></span>
+                                        <span>Save Changes</span>
+                                    }
+                                </button>
+                                <button type="button" class="btn btn-secondary" @onclick="GoBack" disabled="@isSubmitting">
+                                    <span class="oi oi-x"></span> Cancel
+                                </button>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(successMessage))
+                            {
+                                <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                                    <strong>Success!</strong> @successMessage
+                                    <button type="button" class="btn-close" @onclick="() => successMessage = null"></button>
+                                </div>
+                            }
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Product Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Product ID</td>
+                                    <td class="text-break">@product.Id</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">SKU</td>
+                                    <td>@product.Sku</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Current Price</td>
+                                    <td>@product.FormattedPrice</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Status</td>
+                                    <td>
+                                        <span class="badge" 
+                                              style="@(product.IsActive ? "background-color: #198754;" : "background-color: #ffc107; color: black;")">
+                                            @(product.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid ProductId { get; set; }
+
+    private ProductDetailViewModel? product;
+    private UpdateProductViewModel formModel = new();
+    private string categoryIdString = string.Empty;
+    private bool isActiveCheckbox = false;
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private string? errorMessage;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProduct();
+    }
+
+    private async Task LoadProduct()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            product = await ProductService.GetProductByIdAsync(ProductId);
+
+            if (product == null)
+            {
+                errorMessage = "Product not found";
+            }
+            else
+            {
+                // Pre-populate form with current values for display purposes
+                formModel = new UpdateProductViewModel
+                {
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    Currency = product.Currency,
+                    CategoryId = product.CategoryId,
+                    IsActive = product.IsActive
+                };
+                categoryIdString = product.CategoryId.ToString();
+                isActiveCheckbox = product.IsActive;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load product: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (product == null)
+        {
+            errorMessage = "Product not found";
+            return;
+        }
+
+        try
+        {
+            isSubmitting = true;
+            errorMessage = null;
+            successMessage = null;
+
+            // Parse CategoryId if provided
+            if (!string.IsNullOrWhiteSpace(categoryIdString))
+            {
+                if (Guid.TryParse(categoryIdString, out var parsedCategoryId))
+                {
+                    formModel.CategoryId = parsedCategoryId;
+                }
+                else
+                {
+                    errorMessage = "Invalid Category ID format. Please enter a valid GUID.";
+                    return;
+                }
+            }
+
+            // Only include fields that were actually changed from the UI perspective
+            var updateModel = new UpdateProductViewModel
+            {
+                Name = string.IsNullOrWhiteSpace(formModel.Name) || formModel.Name == product.Name ? null : formModel.Name,
+                Description = formModel.Description == product.Description ? null : formModel.Description,
+                Price = formModel.Price == product.Price ? null : formModel.Price,
+                Currency = formModel.Currency == product.Currency ? null : formModel.Currency,
+                CategoryId = formModel.CategoryId == product.CategoryId ? null : formModel.CategoryId,
+                IsActive = isActiveCheckbox == product.IsActive ? null : isActiveCheckbox
+            };
+
+            var updatedProduct = await ProductService.UpdateProductAsync(ProductId, updateModel);
+            successMessage = "Product updated successfully!";
+
+            // Refresh product display
+            await LoadProduct();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to update product: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo($"/products/{ProductId}");
+    }
+}
