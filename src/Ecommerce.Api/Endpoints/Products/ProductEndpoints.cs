@@ -3,6 +3,7 @@ namespace Ecommerce.Api.Endpoints.Products;
 using MediatR;
 using Ecommerce.Application.Catalog.Commands.CreateProduct;
 using Ecommerce.Application.Catalog.Commands.UpdateProduct;
+using Ecommerce.Application.Catalog.Commands.DeleteProduct;
 using Ecommerce.Application.Catalog.DTOs;
 using Ecommerce.Application.Catalog.Queries.GetProductById;
 using Ecommerce.Application.Catalog.Queries.GetProducts;
@@ -46,6 +47,14 @@ public static class ProductEndpoints
             .WithDescription("Updates an existing product in the catalog")
             .Produces<ProductDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .WithOpenApi();
+
+        group.MapDelete("/{id:guid}", DeleteProductAsync)
+            .WithName("DeleteProduct")
+            .WithDescription("Deletes (deactivates) an existing product in the catalog")
+            .Produces(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
             .WithOpenApi();
@@ -202,6 +211,54 @@ public static class ProductEndpoints
         var response = ProductToDto(product);
 
         // Return 200 OK with updated product
+        return Results.Ok(response);
+    }
+
+    /// <summary>
+    /// Deletes (deactivates) an existing product.
+    /// </summary>
+    private static async Task<IResult> DeleteProductAsync(
+        Guid id,
+        ISender sender,
+        IProductRepository repository,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeleteProductCommand(id);
+        var result = await sender.Send(command, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            var statusCode = result.Error?.Code switch
+            {
+                "PRODUCT_NOT_FOUND" => StatusCodes.Status404NotFound,
+                _ => StatusCodes.Status400BadRequest
+            };
+
+            var problemDetails = new ProblemDetails
+            {
+                Type = statusCode == StatusCodes.Status404NotFound
+                    ? "https://api.example.com/errors/not-found"
+                    : "https://api.example.com/errors/operation-failed",
+                Title = statusCode == StatusCodes.Status404NotFound
+                    ? "Product Not Found"
+                    : "Product Deletion Failed",
+                Status = statusCode,
+                Detail = result.Error?.Message ?? "Failed to delete product",
+                Instance = $"DELETE /api/products/{id}",
+                Extensions = new Dictionary<string, object?>
+                {
+                    { "errorCode", result.Error?.Code ?? "UNKNOWN" }
+                }
+            };
+
+            return statusCode == StatusCodes.Status404NotFound
+                ? Results.NotFound(problemDetails)
+                : Results.BadRequest(problemDetails);
+        }
+
+        var productId = result.Value;
+        var product = await repository.GetByIdAsync(productId, cancellationToken);
+        var response = ProductToDto(product);
         return Results.Ok(response);
     }
 
